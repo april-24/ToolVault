@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ToolVault
 
 Access to PPT: https://1drv.ms/p/c/690f335b24831557/IQBxLst4PwjSQZXm3phwIhHFAU1CyOJ1lEMzjB-K0kU-wf8?e=HecRrk
@@ -122,4 +121,3 @@ These are prototype profiles handled by the app, not Firebase email/password acc
 - Tool images can be added under `client_app/assets/tools/` and referenced by the resident app.
 
 See [`PROGRESS.md`](PROGRESS.md) for the current implementation status and remaining work.
->>>>>>> a8ee84d (Initial Tool Vault prototype)
