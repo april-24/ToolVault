@@ -876,7 +876,7 @@ class _CatalogPageState extends State<CatalogPage> {
           children: [
             Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1080),
+                constraints: const BoxConstraints(maxWidth: 960),
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -931,7 +931,9 @@ class _CatalogPageState extends State<CatalogPage> {
         LayoutBuilder(
           builder: (context, constraints) {
             final cardWidth = (constraints.maxWidth - 18) / 3;
-            final cardHeight = (cardWidth * 1.8).clamp(250.0, 400.0);
+            // Keep the square image plus the text, price, availability and
+            // button inside each card at every viewport width.
+            final cardHeight = cardWidth + 145;
             return GridView.count(
               crossAxisCount: 3,
               crossAxisSpacing: 9,
