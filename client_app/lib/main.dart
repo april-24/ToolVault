@@ -268,6 +268,7 @@ class _ToolVaultAppState extends State<ToolVaultApp> {
   DemoUser? user;
   int tab = 0;
   List<Map<String, dynamic>> inventory = [], rentals = [];
+  bool inventoryLoaded = false, loadingInventory = false;
   String? apiError;
   Timer? poll;
   @override
@@ -291,10 +292,17 @@ class _ToolVaultAppState extends State<ToolVaultApp> {
       setState(() {
         inventory = List<Map<String, dynamic>>.from(x[0]['tools'] as List);
         rentals = List<Map<String, dynamic>>.from(x[1]['reservations'] as List);
+        inventoryLoaded = true;
+        loadingInventory = false;
         apiError = null;
       });
     } on ApiFailure catch (e) {
-      if (mounted) setState(() => apiError = e.message);
+      if (mounted) {
+        setState(() {
+          apiError = e.message;
+          loadingInventory = false;
+        });
+      }
     }
   }
 
@@ -302,6 +310,8 @@ class _ToolVaultAppState extends State<ToolVaultApp> {
     setState(() {
       user = u;
       tab = 0;
+      inventoryLoaded = false;
+      loadingInventory = true;
     });
     refresh();
     poll?.cancel();
@@ -360,6 +370,7 @@ class _ToolVaultAppState extends State<ToolVaultApp> {
                 user: user!,
                 tab: tab,
                 inventory: inventory,
+                inventoryLoading: loadingInventory || !inventoryLoaded,
                 rentals: rentals,
                 error: apiError,
                 onTab: (v) => setState(() => tab = v),
@@ -375,7 +386,11 @@ class _ToolVaultAppState extends State<ToolVaultApp> {
                 },
                 onLogout: () {
                   poll?.cancel();
-                  setState(() => user = null);
+                  setState(() {
+                    user = null;
+                    inventoryLoaded = false;
+                    loadingInventory = false;
+                  });
                 },
               ),
       );
@@ -492,6 +507,7 @@ class ResidentHome extends StatelessWidget {
     required this.user,
     required this.tab,
     required this.inventory,
+    required this.inventoryLoading,
     required this.rentals,
     required this.error,
     required this.onTab,
@@ -504,6 +520,7 @@ class ResidentHome extends StatelessWidget {
   final DemoUser user;
   final int tab;
   final List<Map<String, dynamic>> inventory, rentals;
+  final bool inventoryLoading;
   final String? error;
   final ValueChanged<int> onTab;
   final Future<void> Function(VaultTool) onRent;
@@ -516,6 +533,7 @@ class ResidentHome extends StatelessWidget {
     final page = tab == 0
         ? CatalogPage(
             inventory: inventory,
+            isLoading: inventoryLoading,
             onRent: onRent,
             onHelp: () => onTab(2),
           )
@@ -583,10 +601,12 @@ class CatalogPage extends StatefulWidget {
   const CatalogPage({
     super.key,
     required this.inventory,
+    required this.isLoading,
     required this.onRent,
     required this.onHelp,
   });
   final List<Map<String, dynamic>> inventory;
+  final bool isLoading;
   final Future<void> Function(VaultTool) onRent;
   final VoidCallback onHelp;
   @override
@@ -945,6 +965,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   .map((t) => ToolCard(
                         tool: t,
                         available: stock[t.id] ?? 0,
+                        isLoading: widget.isLoading,
                         onRent: () => openTool(t),
                       ))
                   .toList(),
@@ -1182,10 +1203,12 @@ class ToolCard extends StatefulWidget {
     super.key,
     required this.tool,
     required this.available,
+    required this.isLoading,
     required this.onRent,
   });
   final VaultTool tool;
   final int available;
+  final bool isLoading;
   final VoidCallback onRent;
   @override
   State<ToolCard> createState() => _ToolCardState();
@@ -1263,14 +1286,25 @@ class _ToolCardState extends State<ToolCard> {
               SizedBox(
                 height: 32,
                 child: FilledButton(
-                  onPressed: widget.onRent,
+                  onPressed: widget.isLoading || widget.available <= 0
+                      ? null
+                      : widget.onRent,
                   style: FilledButton.styleFrom(
                     backgroundColor: red,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    disabledForegroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     textStyle: const TextStyle(
                         fontSize: 9, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('VIEW DETAILS', maxLines: 1),
+                  child: Text(
+                    widget.isLoading
+                        ? 'LOADING…'
+                        : widget.available > 0
+                            ? 'RENT'
+                            : 'UNAVAILABLE',
+                    maxLines: 1,
+                  ),
                 ),
               ),
             ],
@@ -1303,24 +1337,6 @@ class _BookingPageState extends State<BookingPage> {
         body: ListView(
           padding: const EdgeInsets.all(18),
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: AspectRatio(
-                aspectRatio: 1.15,
-                child: Container(
-                  color: const Color(0xFFFFF5E7),
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    toolAssetPath(widget.tool.id),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(widget.tool.icon, color: red, size: 72),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
