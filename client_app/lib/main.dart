@@ -874,9 +874,12 @@ class _CatalogPageState extends State<CatalogPage> {
 
         return Stack(
           children: [
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1080),
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
         const Text(
           'TOOLS FOR YOUR HOME',
           style: TextStyle(
@@ -946,7 +949,9 @@ class _CatalogPageState extends State<CatalogPage> {
             );
           },
         ),
-              ],
+                  ],
+                ),
+              ),
             ),
             AnimatedPositioned(
               duration: const Duration(milliseconds: 180),
