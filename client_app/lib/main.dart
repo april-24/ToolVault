@@ -70,6 +70,13 @@ const red = Color(0xFF9E1B32),
     paper = Color(0xFFF7F6F3),
     border = Color(0xFFE8E4DF);
 String rm(num n) => 'RM ${n.toStringAsFixed(n == n.roundToDouble() ? 0 : 2)}';
+String toolAssetPath(String id) => switch (id) {
+      'furniture_kit' => 'assets/tools/furniture_moving_kit.jpg',
+      'workbench' => 'assets/tools/folding_workbench.jpg',
+      'drain_auger' => 'assets/tools/manual_drain_auger.jpg',
+      'window_kit' => 'assets/tools/window_cleaning_kit.jpg',
+      _ => 'assets/tools/$id.jpg',
+    };
 String dateTime(dynamic value) {
   if (value == null) return '—';
   final d = DateTime.parse(value.toString()).toLocal();
@@ -631,10 +638,18 @@ class _CatalogPageState extends State<CatalogPage> {
   }
 
   Future<void> openTool(VaultTool tool) async {
+    final item = widget.inventory.firstWhere(
+      (row) => row['id']?.toString() == tool.id,
+      orElse: () => <String, dynamic>{},
+    );
+    final available = (item['available'] as num?)?.toInt() ?? 0;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) =>
-            BookingPage(tool: tool, onReserve: () => widget.onRent(tool)),
+        builder: (_) => BookingPage(
+          tool: tool,
+          available: available,
+          onReserve: () => widget.onRent(tool),
+        ),
       ),
     );
   }
@@ -1175,13 +1190,6 @@ class _ToolCardState extends State<ToolCard> {
   @override
   Widget build(BuildContext context) {
     final tool = widget.tool;
-    final imagePath = switch (tool.id) {
-      'furniture_kit' => 'assets/tools/furniture_moving_kit.jpg',
-      'workbench' => 'assets/tools/folding_workbench.jpg',
-      'drain_auger' => 'assets/tools/manual_drain_auger.jpg',
-      'window_kit' => 'assets/tools/window_cleaning_kit.jpg',
-      _ => 'assets/tools/${tool.id}.jpg',
-    };
     return MouseRegion(
       onEnter: (_) => setState(() => hovering = true),
       onExit: (_) => setState(() => hovering = false),
@@ -1212,7 +1220,7 @@ class _ToolCardState extends State<ToolCard> {
                     color: const Color(0xFFFFF5E7),
                     alignment: Alignment.center,
                     child: Image.asset(
-                      imagePath,
+                      toolAssetPath(tool.id),
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (context, error, stackTrace) =>
@@ -1248,14 +1256,14 @@ class _ToolCardState extends State<ToolCard> {
               SizedBox(
                 height: 32,
                 child: FilledButton(
-                  onPressed: widget.available > 0 ? widget.onRent : null,
+                  onPressed: widget.onRent,
                   style: FilledButton.styleFrom(
                     backgroundColor: red,
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     textStyle: const TextStyle(
                         fontSize: 9, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('VIEW / RENT', maxLines: 1),
+                  child: const Text('VIEW DETAILS', maxLines: 1),
                 ),
               ),
             ],
@@ -1267,8 +1275,14 @@ class _ToolCardState extends State<ToolCard> {
 }
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key, required this.tool, required this.onReserve});
+  const BookingPage({
+    super.key,
+    required this.tool,
+    required this.available,
+    required this.onReserve,
+  });
   final VaultTool tool;
+  final int available;
   final Future<void> Function() onReserve;
   @override
   State<BookingPage> createState() => _BookingPageState();
@@ -1278,17 +1292,92 @@ class _BookingPageState extends State<BookingPage> {
   bool accepted = false, loading = false;
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('RESERVE TOOL')),
+        appBar: AppBar(title: const Text('TOOL DETAILS')),
         body: ListView(
           padding: const EdgeInsets.all(18),
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: AspectRatio(
+                aspectRatio: 1.15,
+                child: Container(
+                  color: const Color(0xFFFFF5E7),
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    toolAssetPath(widget.tool.id),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Icon(widget.tool.icon, color: red, size: 72),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(
+                  avatar: const Icon(Icons.category_outlined, size: 17),
+                  label: Text(widget.tool.category),
+                  visualDensity: VisualDensity.compact,
+                ),
+                Chip(
+                  avatar: Icon(
+                    widget.available > 0
+                        ? Icons.check_circle_outline
+                        : Icons.do_not_disturb_on_outlined,
+                    size: 17,
+                    color: widget.available > 0 ? Colors.green : red,
+                  ),
+                  label: Text(widget.available > 0
+                      ? '${widget.available} available'
+                      : 'Currently unavailable'),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
             Text(
               widget.tool.name,
               style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w900),
             ),
+            const SizedBox(height: 8),
             Text(
-              '${rm(widget.tool.rate)} per hour · charged for actual time, rounded up to each started hour.',
-              style: const TextStyle(color: red, fontWeight: FontWeight.w800),
+              widget.tool.description,
+              style: const TextStyle(color: muted, fontSize: 15, height: 1.5),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 14, bottom: 4),
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF5E7),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.payments_outlined, color: red),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${rm(widget.tool.rate)} per hour',
+                            style: const TextStyle(
+                                color: red,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16)),
+                        const SizedBox(height: 3),
+                        const Text(
+                          'Charged for actual rental time, rounded up to each started hour.',
+                          style: TextStyle(color: muted, height: 1.35),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 12),
@@ -1348,7 +1437,7 @@ class _BookingPageState extends State<BookingPage> {
             SizedBox(
               height: 52,
               child: FilledButton(
-                onPressed: accepted && !loading
+                onPressed: accepted && !loading && widget.available > 0
                     ? () async {
                         setState(() => loading = true);
                         await widget.onReserve();
@@ -1357,7 +1446,11 @@ class _BookingPageState extends State<BookingPage> {
                     : null,
                 style: FilledButton.styleFrom(backgroundColor: red),
                 child: Text(
-                  loading ? 'RESERVING…' : 'RESERVE & GENERATE PICKUP PASS',
+                  loading
+                      ? 'RESERVING…'
+                      : widget.available > 0
+                          ? 'RESERVE & GENERATE PICKUP PASS'
+                          : 'CURRENTLY UNAVAILABLE',
                 ),
               ),
             ),
