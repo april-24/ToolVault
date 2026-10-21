@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#9e1b32" />
+    <meta name="description" content="Tool Vault self-service locker kiosk" />
+    <title>TOOL VAULT · SELF-SERVICE LOCKER</title>
+    <link rel="icon" type="image/png" href="assets/tool_vault_logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <img src="assets/tool_vault_logo.png" alt="Tool Vault" class="brand-logo" />
+      <div class="brand-copy">
+        <strong>TOOL VAULT</strong>
+        <span>SELF-SERVICE LOCKER</span>
+      </div>
+      <span class="connection" id="connection-state"><i></i> Connecting</span>
+    </header>
+
+    <main class="stage">
+      <section class="panel welcome" id="welcome-screen">
+        <div class="hero-mark"><img src="assets/tool_vault_logo.png" alt="" /></div>
+        <p class="eyebrow">TOWNSHIP TOOL LIBRARY</p>
+        <h1>HI, BORROW ANY TOOLS?</h1>
+        <p class="intro">Use your resident app pass to collect or return a shared tool.</p>
+        <div class="welcome-actions">
+          <button class="button primary" id="start-pickup"><span>↗</span> PICK UP A RESERVED TOOL</button>
+          <button class="button secondary" id="start-return"><span>↩</span> RETURN A TOOL</button>
+        </div>
+        <p class="quiet">Have your six-digit PIN or rental QR ready.</p>
+      </section>
+
+      <section class="panel entry-panel hidden" id="entry-screen">
+        <button class="back-link" id="back-home">← BACK TO WELCOME</button>
+        <p class="eyebrow" id="entry-eyebrow">RESERVATION PICKUP</p>
+        <h1 id="entry-title">VERIFY YOUR PICKUP PASS</h1>
+        <p class="intro" id="entry-copy">Scan the QR from the resident app or enter its six-digit PIN.</p>
+        <div class="field-label" id="field-label">PICKUP PIN</div>
+        <input id="pin-input" class="pin-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Enter 6-digit PIN" />
+        <div class="or-divider"><span>OR SCAN YOUR RENTAL QR</span></div>
+        <button class="button secondary scan-button" id="scan-qr"><span>▦</span> SCAN QR PASS</button>
+        <p class="helper">The QR and PIN are linked to one reservation and its assigned locker.</p>
+        <button class="button primary verify-button" id="verify-pass">VERIFY PASS &amp; OPEN LOCKER</button>
+        <p class="error-message hidden" id="entry-error" role="alert"></p>
+      </section>
+
+      <section class="panel result-panel hidden" id="result-screen">
+        <div class="result-icon" id="result-icon">✓</div>
+        <p class="eyebrow" id="result-eyebrow">PASS VERIFIED</p>
+        <h1 id="result-title">LOCKER 01 OPENED</h1>
+        <p class="tool-name" id="result-tool"></p>
+        <div class="locker-instruction" id="locker-instruction"></div>
+        <div class="result-safety" id="result-safety"></div>
+        <div class="result-actions" id="result-actions"></div>
+        <button class="button text-button" id="finish-screen">BACK TO WELCOME SCREEN</button>
+      </section>
+
+      <footer>NEIGHBOURHOOD TOOL LIBRARY <span>·</span> SELF-SERVICE KIOSK</footer>
+    </main>
+
+    <div class="modal hidden" id="camera-modal" aria-modal="true" role="dialog" aria-labelledby="camera-title">
+      <div class="modal-card">
+        <button class="modal-close" id="close-camera" aria-label="Close">×</button>
+        <p class="eyebrow" id="camera-eyebrow">CAMERA</p>
+        <h2 id="camera-title">QR SCANNER</h2>
+        <div class="video-frame">
+          <video id="camera-video" autoplay playsinline muted></video>
+          <div class="scan-frame hidden" id="scan-frame" aria-hidden="true"><span></span></div>
+          <div class="video-placeholder" id="camera-placeholder"><span>▣</span><b>TURNING ON CAMERA…</b></div>
+        </div>
+        <p class="camera-message" id="camera-message"></p>
+        <p class="sensor-caption hidden" id="sensor-caption">Occupancy sensor simulation: cover the camera until its image stays dark. The kiosk automatically confirms the return after detecting a sustained dark frame.</p>
+        <div class="modal-actions" id="camera-actions"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

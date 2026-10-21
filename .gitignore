@@ -1,0 +1,32 @@
+# Flutter/Dart generated files
+**/.dart_tool/
+**/build/
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/coverage/
+
+# IDE and local workspace files
+.idea/
+.vscode/
+**/.idea/
+**/*.iml
+**/android/local.properties
+
+# Local signing material and secrets
+**/key.properties
+**/*.jks
+**/*.keystore
+.env
+.env.*
+
+# Python caches for the retained legacy API
+__pycache__/
+*.py[cod]
+
+# Firebase local cache and debug logs
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
