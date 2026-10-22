@@ -1,100 +1,50 @@
-# TOOL VAULT — Prototype Guide
+# TOOL VAULT
 
-Tool Vault is a township tool-rental prototype with a Flutter resident app and an HTML/CSS/JavaScript kiosk:
+## Access Links
 
-- `client mobile app/` — resident app for browsing and reserving shared tools.
-- `kiosk/web/` — browser kiosk for pickup, return, QR scanning, and the live camera preview used to simulate the locker occupancy sensor.
+- **Resident mobile app:** [Open ToolVault](https://toolvault-271d9.web.app)
+- **Self-service kiosk:** [Open the kiosk](https://toolvault-271d9-kiosk.web.app)
+- **Source code:** [GitHub repository](https://github.com/april-24/ToolVault)
+- **Demo login accounts:** [View sample accounts](DemoAccounts.md)
 
-The apps are already configured to use the team's shared Firebase project. For the demo, teammates do **not** need to create their own Firebase project or do Firebase Console setup. Both apps use the same configured project, so rental and inventory changes are shared and persist between runs. The Firebase project owner remains responsible for its settings and access rules.
+Open the resident app and kiosk in separate browser tabs or devices to show how they work together.
 
-## Open the project in VS Code
+## What Tool Vault Does
 
-### 1. Install the VS Code extensions
+Tool Vault is a shared tool-rental service for a township. Residents use the mobile app to find and reserve household tools, then use a self-service kiosk to collect and return them. The system connects each reservation to a locker, tracks rental time and fees, supports in-app payment, and lets residents report damaged tools. It helps residents access tools without needing to buy or store every item themselves.
 
-1. Open **Visual Studio Code**.
-2. Select the **Extensions** icon on the left, or press **Ctrl+Shift+X**.
-3. Search for **Flutter** by Dart Code and select **Install**. VS Code will also install or prompt you to install the **Dart** extension; install it too.
-4. Search for **Live Server** by Ritwick Dey and select **Install**. This launches the HTML kiosk in a browser.
-5. If VS Code asks to reload, select **Reload**.
+## How to Open Tool Vault
 
-> The Flutter extension helps VS Code understand Flutter projects. You still need the Flutter SDK installed on your computer. This project was prepared with Flutter; check your setup in the VS Code terminal with `flutter doctor -v`.
+### Option 1: Open the links
 
-### 2. Open the Hackathon folder
+1. Open the [Resident mobile app](https://toolvault-271d9.web.app).
+2. Open the [Self-service kiosk](https://toolvault-271d9-kiosk.web.app) in another tab, browser or device.
+3. Sign in to the resident app with an account from [DemoAccounts.md](DemoAccounts.md).
+4. Allow camera access on the kiosk if you want to demonstrate QR scanning. The kiosk link uses HTTPS, which supports camera access in modern browsers.
 
-1. In VS Code, select **File → Open Folder…**.
-2. Choose the `Hackathon` folder you downloaded or cloned. For the original Windows location, it is `C:\Users\lowli\Downloads\Hackathon`.
-3. If VS Code asks whether you trust the authors, choose **Yes, I trust the authors**.
-4. In the Explorer panel, confirm that `client mobile app` and `kiosk` appear under the opened folder.
+### Option 2: Run the apps in VS Code
 
-Open the `Hackathon` folder itself, not only one of the app folders, so you can easily access both apps and this guide.
+1. Install **Visual Studio Code**, the **Flutter SDK**, and **Git**.
+2. In VS Code Extensions, install **Flutter** by Dart Code (install the Dart extension if prompted) and **Live Server** by Ritwick Dey.
+3. Clone or download the [GitHub repository](https://github.com/april-24/ToolVault), then open the downloaded `ToolVault` project folder in VS Code.
+4. Open **Terminal → New Terminal** in VS Code and run the resident app:
 
-## Run both apps in Chrome
+   ```bash
+   cd client_app
+   flutter pub get
+   flutter run -d chrome
+   ```
 
-Run the resident Flutter app from a VS Code terminal and open the kiosk with Live Server. Keep both browser tabs open for the shared demo.
+5. In VS Code Explorer, open `kiosk/web/index.html`, right-click it and select **Open with Live Server**. Keep the resident app and kiosk open at the same time.
+6. Use the demo account listed in [DemoAccounts.md](DemoAccounts.md) to sign in. The project already contains its shared Firebase configuration; teammates do not need to create a separate Firebase project.
 
-### Start the resident app
+## Demo Steps
 
-1. Select **Terminal → New Terminal**.
-2. Make sure the terminal starts in the `Hackathon` folder. Then enter:
+1. Open the resident app and kiosk, then sign in with a sample resident account.
+2. In the app, browse the tools, open one, review its safety guidance and reserve it.
+3. Show the pickup QR code or PIN from the app and enter or scan it at the kiosk. The kiosk displays the assigned locker and confirms pickup.
+4. In **My Rentals**, open the borrowed tool and generate a return pass. Use its temporary QR code or PIN at the kiosk to open the assigned locker for return.
+5. Follow the kiosk's return-sensor simulation to confirm the tool is back. The app then shows the completed rental and final fee.
+6. Complete the payment flow in the app. You can also demonstrate sending a damage report from the Help section.
 
-```powershell
-cd "client mobile app"
-flutter pub get
-flutter run -d chrome
-```
-
-Wait for Chrome to open the resident app. Sign in with one of the resident accounts below.
-
-### Start the kiosk site
-
-1. In VS Code, install the **Live Server** extension if it is not already installed.
-2. In the Explorer panel, open `kiosk/web/index.html`.
-3. Right-click `index.html` and choose **Open with Live Server** (or select **Go Live**).
-4. Keep the Live Server tab open alongside the resident app. Do not use `flutter run` for the kiosk; its browser version is now HTML, CSS, and JavaScript.
-
-Use `localhost` for the local demo. Allow Chrome to use the camera when prompted. QR scan uses the browser's built-in decoder where available, with a `jsQR` fallback loaded from jsDelivr (internet required). For a second phone or a hosted demo, use an HTTPS-hosted kiosk link and add its domain to Firebase Authentication's authorized domains; a plain HTTP link to your computer's local IP cannot access the phone's camera.
-
-### Run the resident app on an Android phone instead
-
-Connect the resident's phone with USB debugging enabled, then run `flutter devices` in the `client mobile app` terminal. Use the device ID shown in the list:
-
-```powershell
-flutter run -d DEVICE_ID
-```
-
-For the simplest examiner walkthrough, run the resident app and kiosk in Chrome as described above.
-
-## Resident demo accounts
-
-Use any of these sample profiles on the resident app's login screen:
-
-| Resident | Email | Password | Unit |
-|---|---|---|---|
-| Aina Rahman | `aina@toolvault.demo` | `Aina123!` | V-08-12 |
-| Jason Tan | `jason@toolvault.demo` | `Jason123!` | V-03-05 |
-| Priya Kumar | `priya@toolvault.demo` | `Priya123!` | V-11-02 |
-
-These are prototype resident profiles, not Firebase email/password accounts. Firebase access runs through the shared project's existing anonymous demo sign-in configuration. The kiosk does not need a resident login.
-
-## Pickup and return pass
-
-Each reservation has a pickup PIN and QR and must be collected within 15 minutes. Residents can cancel an uncollected reservation from its details page. After the kiosk verifies pickup, the resident app marks the rental **Borrowed** and starts the timer. Open a borrowed rental from **My Rentals**, then tap **Generate Return Pass** to create a separate return PIN and QR that work for two minutes. The timer keeps running while the pass is active. If it expires, the rental returns to **Borrowed**; when the resident is still viewing the pass, the app returns to My Rentals. The kiosk shows the assigned locker number for that individual tool unit. Its live camera preview simulates the physical occupancy sensor: a sustained dark frame automatically confirms the return.
-
-## Suggested demo walkthrough
-
-1. Sign into the resident app using a sample account.
-2. Open a tool, review its safety guidance, and reserve it.
-3. Use the reservation QR or PIN at the kiosk to simulate pickup.
-4. Open the borrowed rental in **My Rentals**, tap **Generate Return Pass**, then present the new two-minute QR/PIN at the kiosk.
-5. Put the tool back in its assigned locker, open the occupancy-camera preview, and cover the camera until it detects a sustained dark frame; the kiosk then completes the return automatically.
-6. Return to the resident app to review the rental fee and complete the simulated payment flow.
-
-The shared Firestore data persists between sessions. If a previous demo left tools reserved or borrowed, their availability may reflect that saved state.
-
-## Prototype notes
-
-- The kiosk camera, physical locker, occupancy sensor, and payment are simulations; no physical locker is controlled and no real card is charged.
-- The kiosk opens a live browser camera preview; the confirm button simulates the physical occupancy sensor. Camera access requires localhost or HTTPS.
-- Firebase is already configured for the shared demo project; no separate Firebase project is needed for a teammate running this repository.
-- `server.py` is a legacy local API from an earlier version and is not required to run the current Firebase-connected apps.
-- The full progress log is in `PROGRESS.md`.
+The locker, return sensor and payment are demonstrated through the software prototype; they are not connected to physical locker hardware or real card charges.
